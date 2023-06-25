@@ -110,6 +110,7 @@
 import HeaderTop from "../components/Header.vue";
 import moment from "moment";
 import Captcha from "../components/Captcha.vue";
+import md5 from "md5";
 
 export default {
   components: {
@@ -244,7 +245,7 @@ export default {
             .get("/user/toLogin", {
               params: {
                 username: this.loginForm.username,
-                password: this.loginForm.password
+                password: md5(this.loginForm.password)
               }
             })
             .then(res => {
@@ -264,6 +265,7 @@ export default {
     submitForm(registerForm) {
       this.$refs[registerForm].validate(valid => {
         if (valid) {
+          // 判断验证码是否错误
           if (this.checkCode.toUpperCase() !== this.imgCode) {
             // 验证码错误 刷新验证码 清空验证码输入框
             this.$message.error("验证码错误");
@@ -298,15 +300,13 @@ export default {
                       .post("/user/insertUserToAccount", {
                         userid: res.data,
                         username: this.registerForm.username,
-                        password: this.registerForm.password
+                        password: md5(this.registerForm.password)
                       })
                       .then(res => {
+                        console.log(res);
                         if (res.data == 1) {
                           //注册成功，跳转首页
-                          this.$message({
-                            type: "warning",
-                            message: "注册成功，请登录！"
-                          });
+                          this.$message.success("注册成功，请登录");
                           //替换地址
                           location.replace(
                             "http://localhost:8080/#/login?name=login"
